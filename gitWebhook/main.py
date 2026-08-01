@@ -41,9 +41,12 @@ async def webhook(request: Request):
     payload = await request.json()
     event: str = request.headers.get("X-Github-Event")
 
+
     print(body)
     with open(log_file, "a") as f:
         f.write(f'body: {payload}\n')
         f.write(f'event: {event}\n')
         f.write(f'signature: {signature}\n')
+        
+    
     return {"message": "Hello World"}
