@@ -1,3 +1,5 @@
+'''Main Webhook recieving file'''
+
 import logging
 import hashlib
 import hmac
@@ -14,20 +16,16 @@ from worker import worker
 
 
 BASE_DIR = Path(__file__).resolve().parent
-
 VERSION_FILE = BASE_DIR / ".version"
 
 load_dotenv(BASE_DIR / ".env")
-
 git_webhook_secret = os.getenv(
     "GIT_WEBHOOK_SECRET"
 )
-
 if not git_webhook_secret:
     raise RuntimeError(
         "GIT_WEBHOOK_SECRET not found"
     )
-
 url = os.getenv(
     "REPO_URL"
 )
@@ -47,7 +45,6 @@ try:
     version = int(
         VERSION_FILE.read_text().strip()
     )
-
 except (FileNotFoundError, ValueError):
     version = 1
 
@@ -82,7 +79,7 @@ def get_queue():
 
 @app.post("/")
 async def webhook(request: Request):
-
+    '''recieve the requests from github'''
     global version
 
     signature = request.headers.get(
@@ -105,7 +102,7 @@ async def webhook(request: Request):
             hashlib.sha256
         ).hexdigest()
     )
-
+    # compares hmac signature for authenticity
     if not hmac.compare_digest(
         signature,
         expected

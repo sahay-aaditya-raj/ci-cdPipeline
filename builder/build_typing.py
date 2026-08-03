@@ -1,3 +1,5 @@
+'''Typing for Builder Queue'''
+
 from typing import TypedDict, Literal
 
 class BuildQueueItem(TypedDict):

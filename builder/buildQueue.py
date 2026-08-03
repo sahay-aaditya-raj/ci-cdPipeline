@@ -1,3 +1,5 @@
+'''Builder Queue Class Implementation'''
+
 import json
 import logging
 
@@ -15,8 +17,10 @@ logging.basicConfig(
 
 
 class BuildQueue:
-
+    '''Uses file for shared queue'''
+    
     MAX_SIZE = 10
+    
     def __init__(self):
         self.queue_file = (
             Path(__file__).resolve().parent
@@ -29,22 +33,18 @@ class BuildQueue:
         try:
             with open(self.queue_file, "r") as f:
                 return json.load(f)
-
         except (json.JSONDecodeError, FileNotFoundError):
             return []
 
-    def _write(
-        self,
-        queue: List[BuildQueueItem]
-    ) -> None:
+    def _write(self, queue: List[BuildQueueItem]) -> None:
 
         with open(self.queue_file, "w") as f:
             json.dump(queue, f, indent=4)
 
-    def add_item(
-        self,
-        item: BuildQueueItem
-    ) -> None:
+    def add_item(self, item: BuildQueueItem) -> None:
+        '''Adds a new item to the queue
+        Removes the oldest if queue reaches it size'''
+        
         queue = self._read()
         if len(queue) >= self.MAX_SIZE:
             queue.pop(0)
@@ -55,10 +55,13 @@ class BuildQueue:
         )
 
     def get_queue(self) -> List[BuildQueueItem]:
+        """
+        Get the current queue state
+        """
         return self._read()
 
     def get_pending(self) -> List[BuildQueueItem]:
-
+        """Returns the list of pending items"""
         queue = self._read()
 
         return [
@@ -67,17 +70,8 @@ class BuildQueue:
             if item["status"] == "pending"
         ]
 
-    def update_item_status(
-        self,
-        item_id: str,
-        new_status: Literal[
-            "pending",
-            "in_progress",
-            "completed",
-            "failed"
-        ]
-    ) -> None:
-
+    def update_item_status(self, item_id: str,new_status: Literal["pending","in_progress","completed","failed"]) -> None:
+        '''Updates the item in the queue'''
         queue = self._read()
 
         for item in queue:
