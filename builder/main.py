@@ -82,6 +82,14 @@ async def webhook(request: Request):
     '''recieve the requests from github'''
     global version
 
+    event = request.headers.get(
+            "X-GitHub-Event"
+        )
+    if event != "push":
+        return {
+            "message": f"Event ignored. Got Event: {event}"
+        }
+        
     signature = request.headers.get(
         "X-Hub-Signature-256"
     )
@@ -114,14 +122,6 @@ async def webhook(request: Request):
 
     payload = await request.json()
 
-    event = request.headers.get(
-        "X-GitHub-Event"
-    )
-
-    if event != "push":
-        return {
-            "message": "Event ignored"
-        }
 
     commit_id = payload.get("after")
 
